@@ -3,11 +3,11 @@
 Particle::Particle(double mass, std::valarray<double> coordinates) :
 	m{ mass },
 	coords{ coordinates },
-	force{ 0,0,0 },
 	tmp_coords{ coordinates },
-	pos_half{0,0,0},
 	pos{coordinates[pos_i]},
-	vel{coordinates[vel_i]}
+	vel{coordinates[vel_i]},
+	pos_half{0,0,0},
+	force{ 0,0,0 }
 {}
 
 void Particle::clearForce(void) {

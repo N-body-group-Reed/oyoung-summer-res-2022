@@ -34,7 +34,7 @@ int main() {
         ptrs.erase(ptrs.begin(), ptrs.end());
 
         NSim_Step(ps_direct, nullptr, dt);
-
+	std::cout << ps_direct[0].pos[0] << std::endl;
         i++;
     }
 }

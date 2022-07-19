@@ -25,8 +25,8 @@ public:
 	double z_min;
 	double z_max;
 	Partition_axis axis;
-	class Tree* r;
 	class Tree* l;
+	class Tree* r;
 	Tree(std::list<class Particle*>& ps, std::list<class Particle*>::iterator& start, std::list<class Particle*>::iterator& stop);
 	~Tree(void);
 	void computeBondingBox(std::list<class Particle*>::iterator start, std::list<class Particle*>::iterator stop);
