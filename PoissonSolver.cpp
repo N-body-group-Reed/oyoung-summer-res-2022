@@ -38,6 +38,27 @@ void Poisson_CalculateForce_SoftSphere(class Particle& p1, class Particle& p2) {
 	p2.force += -F;
 }
 
+void Poisson_Energy(std::vector<class Particle> ps, class Tree* T) {
+  double TE = 0;
+  for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
+    std::valarray<double> v = p->vel;
+    double KE =1.0/2.0*innerProduct(v, v)*p->m;
+    //std::cout<<"KE"<<KE<<std::endl;
+    double UE=0;
+    for (std::vector<class Particle>::iterator p1 = ps.begin(); p1 != ps.end(); p1++) {
+      if (p != p1){
+	std::valarray<double> r = p->pos - p1->pos;
+	double R = sqrt(innerProduct(r, r));
+	UE += -G * p->m * p1->m /R ;
+      }
+    }
+    //std::cout<<"UE"<<UE<<std::endl;
+    //std::cout<<"E"<<UE+KE<<std::endl;
+    TE+=UE+KE;
+  }
+  std::cout<<TE<<std::endl;
+}
+
 void Poisson_TreeForce(std::vector<class Particle>& ps, class Tree* T) {
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
 		Poisson_CalculateForce_Tree(*p, T);
@@ -84,5 +105,8 @@ void Poisson_CalculateForce_Tree(class Particle& p, class Tree* T) {
 void PoissonSolver(std::vector<class Particle>& ps, class Tree* T) {
 	softeningLength = .98 * pow(ps.size(), -0.26);
 	if (T == nullptr) Poisson_DirectSummation(ps);
-	else Poisson_TreeForce(ps, T);
+	else{
+	  Poisson_TreeForce(ps, T);
+	  Poisson_Energy(ps,T);
+	}
 }
