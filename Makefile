@@ -31,7 +31,7 @@ Particle.o: Particle.cpp Particle.h
 
 NSim: $(OBJECTS)
 	$(CXX) $(CXX_FLAGS) -o $@ $^
-	rm -f *.o
+#	rm -f *.o
 
 clean:
-	rm -f *~ $(TARGETS)
+	rm -f *.o *~ $(TARGETS)
