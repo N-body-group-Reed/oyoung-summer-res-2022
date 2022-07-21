@@ -1,7 +1,32 @@
 #include "NSim.h"
 
+double EnergyInit;
+
+int Energy(std::vector<class Particle>& ps) {
+  double TE = 0;
+  for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
+    std::valarray<double> v = p->vel;
+    double KE =1.0/2.0*innerProduct(v, v)*p->m;
+    //std::cout<<"KE"<<KE<<std::endl;
+    double UE=0;
+    for (std::vector<class Particle>::iterator p1 = ps.begin(); p1 != ps.end(); p1++) {
+      if (p != p1){
+	std::valarray<double> r = p->pos - p1->pos;
+	double R = sqrt(innerProduct(r, r));
+	UE += -G * p->m * p1->m /R ;
+      }
+    }
+    //std::cout<<"UE"<<UE<<std::endl;
+    //std::cout<<"E"<<UE+KE<<std::endl;
+    TE+=UE+KE;
+  }
+  return TE;
+}
+
+
 void NSim_Step(std::vector<class Particle>& ps, class Tree* T, double dt) {
 	Integrator(ps, T, dt);
+	if (T != nullptr) std::cout<<(Energy(ps)-EnergyInit)/EnergyInit<<std::endl;
 }
 
 void NSim_Init(std::vector<class Particle>& ps, int num_ps) {
@@ -18,5 +43,6 @@ void NSim_Init(std::vector<class Particle>& ps, int num_ps) {
         p.tag = i;
         tmp.push_back(p);
     }
-    ps.assign(tmp.begin(), tmp.end());
+	ps.assign(tmp.begin(), tmp.end());
+	EnergyInit = Energy(ps);	
 }
