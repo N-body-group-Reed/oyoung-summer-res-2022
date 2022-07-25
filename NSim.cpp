@@ -57,7 +57,7 @@ double mag(std::valarray<double> P){
   return mag;
 }
 
-void NSim_Step(std::vector<class Particle>& ps, class Tree* T, double dt) {
+void NSim_Step(std::vector<class Particle>& ps, class OCTree* T, double dt) {
 	Integrator(ps, T, dt);
 	if (T != nullptr) std::cout<<(Energy(ps)-EnergyInit)/EnergyInit<<std::endl;
 	std::cout<<"momentum "<<mag(momentum(ps)-momentumInit)/mag(momentumInit)<<std::endl;
