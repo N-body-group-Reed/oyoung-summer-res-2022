@@ -5,13 +5,13 @@ void Integrator_RK4(std::vector<class Particle>& ps, double dt) {
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
 		p->k1 = dt * RK_Vector(*p);
 		p->clearForce();
-		p->tmp_coords += p->k1 / 2;
+		p->tmp_coords += p->k1 / 2.0;
 	}
 	PoissonSolver(ps);
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
 		p->k2 = dt * RK_Vector(*p);
 		p->clearForce();
-		p->tmp_coords = p->coords + p->k2 / 2;
+		p->tmp_coords = p->coords + p->k2 / 2.0;
 	}
 	PoissonSolver(ps);
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
@@ -23,7 +23,7 @@ void Integrator_RK4(std::vector<class Particle>& ps, double dt) {
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
 		p->k4 = dt * RK_Vector(*p);
 		p->clearForce();
-		p->tmp_coords = p->coords + (1.0 / 3.0) * (p->k1 / 2 + p->k2 + p->k3 + p->k4 / 2);
+		p->tmp_coords = p->coords + (1.0 / 3.0) * (p->k1 / 2.0 + p->k2 + p->k3 + p->k4 / 2.0);
 		p->coords = p->tmp_coords;
 	}
 }
@@ -35,9 +35,9 @@ std::valarray<double> RK_Vector(class Particle& p) {
 	return vec;
 }
 
-void Integrator_LeapFrog_DKD(std::vector<class Particle>& ps, class Tree* T, double dt) {
+void Integrator_LeapFrog_DKD(std::vector<class Particle>& ps, class OCTree* T, double dt) {
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
-		p->pos_half = p->pos + dt * p->vel / 2;
+		p->pos_half = p->pos + dt * p->vel / 2.0;
 		// artifact of PoissonSolver for RK4
 		std::valarray<double> tmp(6);
 		tmp[pos_i] = p->pos_half;
@@ -47,7 +47,28 @@ void Integrator_LeapFrog_DKD(std::vector<class Particle>& ps, class Tree* T, dou
 	PoissonSolver(ps,T);
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
 		p->vel += dt * p->force / p->m;
-		p->pos = p->pos_half + dt * p->vel / 2;
+		p->pos = p->pos_half + dt * p->vel / 2.0;
+		p->clearForce();
+		// artifact of PoissonSolver for RK4
+		std::valarray<double> tmp(6);
+		tmp[pos_i] = p->pos;
+		tmp[vel_i] = p->vel;
+		p->coords = tmp;
+	}
+}
+void Integrator_LeapFrog_DKD(std::vector<class Particle>& ps, class Tree* T, double dt) {
+	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
+		p->pos_half = p->pos + dt * p->vel / 2.0;
+		// artifact of PoissonSolver for RK4
+		std::valarray<double> tmp(6);
+		tmp[pos_i] = p->pos_half;
+		tmp[vel_i] = p->vel;
+		p->tmp_coords = tmp;
+	}
+	PoissonSolver(ps,T);
+	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
+		p->vel += dt * p->force / p->m;
+		p->pos = p->pos_half + dt * p->vel / 2.0;
 		p->clearForce();
 		// artifact of PoissonSolver for RK4
 		std::valarray<double> tmp(6);
@@ -58,6 +79,6 @@ void Integrator_LeapFrog_DKD(std::vector<class Particle>& ps, class Tree* T, dou
 }
 
 
-void Integrator(std::vector<class Particle>& ps, class Tree* T, double dt) {
+void Integrator(std::vector<class Particle>& ps, class OCTree* T, double dt) {
 	Integrator_LeapFrog_DKD(ps,T,dt);
 }
