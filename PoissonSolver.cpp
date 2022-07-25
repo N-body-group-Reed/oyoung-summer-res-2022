@@ -38,13 +38,51 @@ void Poisson_CalculateForce_SoftSphere(class Particle& p1, class Particle& p2) {
 	p2.force += -F;
 }
 
-void Poisson_TreeForce(std::vector<class Particle>& ps, class Tree* T) {
+
+
+
+void Poisson_OCTreeForce(std::vector<class Particle>& ps, class OCTree* T) {
 	for (std::vector<class Particle>::iterator p = ps.begin(); p != ps.end(); p++) {
-		Poisson_CalculateForce_Tree(*p, T);
+	  Poisson_CalculateForce_OCTree(*p, T,0);
 	}
 }
 
-const double theta = 0.75;
+const double theta = 0.0;
+void Poisson_CalculateForce_OCTree(class Particle& p, class OCTree* T,int index) {
+  if (index>2) index=0;
+	std::valarray<double> r = p.pos - T->r_cm;
+	double com_dist = sqrt(innerProduct(r, r));
+	if (T->l != nullptr && T->r != nullptr) {
+		//std::cout << "Has Children" << std::endl;
+		// cell length would be better quantified by the diagonal length of box
+		// more difficult to calculate with max difference approx 1.4
+		// how good of a measure is "node length" anyway?
+		double cell_length;
+		if (index  == 0) cell_length = T->x_max - T->x_min;
+		else if (index == 1) cell_length = T->y_max - T->y_min;
+		else cell_length = T->z_max - T->z_min;
+		if (cell_length / com_dist < theta ) {
+		  //std::cout << "N*ln N interaction" << std::endl;
+			double R = pow(com_dist, 3);
+			p.force += -G * p.m * T->mass * r / R; //* SF;
+		}
+		else {
+			//std::cout << "open children" << std::endl;
+		  Poisson_CalculateForce_OCTree(p, T->l,index+1);
+		  Poisson_CalculateForce_OCTree(p, T->r,index+1);
+		}
+	}
+	else {
+	  if (T->l !=nullptr)std::cout <<"hi"<< std::endl;
+	  if (T->r !=nullptr)std::cout <<"hi"<< std::endl;
+	  double tol = 0.1;
+	  if (com_dist > tol) {
+	    //std::cout << "N*N interaction" << std::endl;
+	    double R = pow(com_dist, 3);
+	    p.force += -G * p.m * T->mass * r / R; //* SF;
+		}
+	}
+}
 void Poisson_CalculateForce_Tree(class Particle& p, class Tree* T) {
 	std::valarray<double> r = p.pos - T->r_cm;
 	//double SF = (innerProduct(r, r) + 5 * pow(softeningLength, 2) / 2) / pow(sqrt(innerProduct(r, r) + pow(softeningLength, 2)), 5);
@@ -81,8 +119,9 @@ void Poisson_CalculateForce_Tree(class Particle& p, class Tree* T) {
 	}
 }
 
-void PoissonSolver(std::vector<class Particle>& ps, class Tree* T) {
-	softeningLength = .98 * pow(ps.size(), -0.26);
+
+void PoissonSolver(std::vector<class Particle>& ps, class OCTree* T) {
+  //softeningLength = .98 * pow(ps.size(), -0.26);	
 	if (T == nullptr) Poisson_DirectSummation(ps);
-	else Poisson_TreeForce(ps, T);
+	else Poisson_OCTreeForce(ps, T);
 }
