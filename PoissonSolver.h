@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "MassTree.h"
+//#include "Octree.h"
 
 const double G = 1.0; //6.6743e-11;
 
