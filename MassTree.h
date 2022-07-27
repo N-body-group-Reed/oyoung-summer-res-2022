@@ -31,13 +31,15 @@ public:
 	~Tree(void);
 	void computeBondingBox(std::list<class Particle*>::iterator start, std::list<class Particle*>::iterator stop);
 	void partitionVolume(void);
-	void sortParticles(std::list<class Particle*>& ps, std::list<class Particle*>::iterator& start, std::list<class Particle*>::iterator& stop);
+	std::list<class Particle*>::iterator sortParticles(std::list<class Particle*>& ps, std::list<class Particle*>::iterator& start, std::list<class Particle*>::iterator& stop,int index,int depth);
+	int BinaryDigit(double N,int D);
+        double Normalize(double x, int index);
 	std::list<class Particle*>::iterator getPartitionIterator(std::list<class Particle*>::iterator start, std::list<class Particle*>::iterator stop);
 	void computeMassMoments(std::list<class Particle*>::iterator start, std::list<class Particle*>::iterator stop);
 	// center of mass and mass moments
 };
 
-void buildTree(class Tree* T, std::list<class Particle*>& ptrs, std::list<class Particle*>::iterator start, std::list<class Particle*>::iterator stop, std::list<class Particle*>::iterator part);
+void buildTree(class Tree* T, std::list<class Particle*>& ptrs, std::list<class Particle*>::iterator start, std::list<class Particle*>::iterator stop, std::list<class Particle*>::iterator part,int index,int depth);
 void orderParticles(std::vector<class Particle>& ps, std::list<class Particle*>& ptrs);
 void printLeafs(class Tree* T);
 
